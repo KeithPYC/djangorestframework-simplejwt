@@ -28,9 +28,10 @@ class TokenBackend:
         issuer=None,
         jwk_url: str = None,
         leeway=0,
+        extra_headers=None,
+
     ):
         self._validate_algorithm(algorithm)
-
         self.algorithm = algorithm
         self.signing_key = signing_key
         self.verifying_key = verifying_key
@@ -39,6 +40,7 @@ class TokenBackend:
 
         self.jwks_client = PyJWKClient(jwk_url) if jwk_url else None
         self.leeway = leeway
+        self.extra_headers = extra_headers
 
     def _validate_algorithm(self, algorithm):
         """
@@ -76,7 +78,7 @@ class TokenBackend:
         if self.issuer is not None:
             jwt_payload["iss"] = self.issuer
 
-        token = jwt.encode(jwt_payload, self.signing_key, algorithm=self.algorithm)
+        token = jwt.encode(jwt_payload, self.signing_key, algorithm=self.algorithm,headers=self.extra_headers)
         if isinstance(token, bytes):
             # For PyJWT <= 1.7.1
             return token.decode("utf-8")
